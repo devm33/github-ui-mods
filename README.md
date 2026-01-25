@@ -2,6 +2,8 @@
 
 A Chrome extension that adds useful modifications to the GitHub pull request interface.
 
+![Screenshot](screenshot.png)
+
 ## Features
 
 ### 1. Copy PR Link Button
