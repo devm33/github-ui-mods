@@ -1,0 +1,21 @@
+{
+  "manifest_version": 3,
+  "name": "GitHub UI Mods",
+  "version": "1.0.0",
+  "description": "Small modifications for the GitHub UI",
+  "permissions": [
+    "clipboardWrite"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["https://github.com/*/*/pull/*"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "icons": {
+    "16": "icon16.png",
+    "48": "icon48.png",
+    "128": "icon128.png"
+  }
+}
