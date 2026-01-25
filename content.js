@@ -107,32 +107,58 @@
     button.addEventListener('click', async function(e) {
       e.preventDefault();
       
-      // Try to find the review request form/button
-      // GitHub's UI typically has a button or action to request reviews
-      // We'll try to find and click it programmatically
+      // Copilot reviewer user ID
+      const COPILOT_USER_ID = '175728472';
       
-      // Try to find the "Reviewers" section and expand it if needed
-      const reviewersSection = document.querySelector('.discussion-sidebar-item.js-discussion-sidebar-item');
-      if (reviewersSection) {
-        // Try multiple selector patterns for the request review button
-        const requestReviewBtn = reviewersSection.querySelector('button[aria-label*="request"]') ||
-                                 reviewersSection.querySelector('summary[aria-label*="request"]') ||
-                                 reviewersSection.querySelector('.js-request-reviewers-button');
+      // Get the authenticity token - look for it in the reviewers form specifically
+      const reviewersForm = document.querySelector('form[action*="review-requests"]');
+      let csrfToken = reviewersForm?.querySelector('input[name="authenticity_token"]')?.value;
+      
+      // Fallback to other sources
+      if (!csrfToken) {
+        csrfToken = document.querySelector('input[name="authenticity_token"]')?.value;
+      }
+      
+      if (!csrfToken) {
+        console.error('Could not find CSRF token');
+        return;
+      }
+      
+      // Get other required headers from the page
+      const fetchNonce = document.querySelector('meta[name="fetch-nonce"]')?.content || '';
+      const clientVersion = document.querySelector('meta[name="github-client-version"]')?.content || '';
+      
+      // Build the review request URL from current page
+      const prUrl = window.location.pathname; // e.g., /owner/repo/pull/123
+      const reviewRequestUrl = `${prUrl}/review-requests`;
+      
+      // Create form data
+      const formData = new FormData();
+      formData.append('authenticity_token', csrfToken);
+      formData.append('partial_last_updated', Math.floor(Date.now() / 1000).toString());
+      formData.append('dummy-field-just-to-avoid-empty-submit', 'foo');
+      formData.append('reviewer_user_ids[]', COPILOT_USER_ID);
+      
+      try {
+        const headers = {
+          'Accept': 'text/html',
+          'X-Requested-With': 'XMLHttpRequest'
+        };
         
-        if (requestReviewBtn) {
-          requestReviewBtn.click();
-          
-          // Wait a bit for the modal/dropdown to appear
-          setTimeout(() => {
-            // Try to find and click on Copilot in the reviewer list
-            const copilotReviewerOption = document.querySelector('[data-filterable-for*="copilot"]') ||
-                                          document.querySelector('[data-targets*="copilot"]') ||
-                                          document.querySelector('label[for*="copilot"]');
-            if (copilotReviewerOption) {
-              copilotReviewerOption.click();
-            }
-          }, 100);
-          
+        if (fetchNonce) {
+          headers['X-Fetch-Nonce'] = fetchNonce;
+        }
+        if (clientVersion) {
+          headers['X-GitHub-Client-Version'] = clientVersion;
+        }
+        
+        const response = await fetch(reviewRequestUrl, {
+          method: 'POST',
+          body: formData,
+          headers: headers
+        });
+        
+        if (response.ok) {
           // Visual feedback - success
           button.innerHTML = `
             <svg aria-hidden="true" height="16" viewBox="0 0 16 16" width="16" class="octicon" style="color: #1a7f37;">
@@ -141,34 +167,22 @@
           `;
           button.style.color = '#1a7f37';
           
+          // Reload the page to show updated reviewers
           setTimeout(() => {
-            button.innerHTML = playIcon;
-            button.style.color = '';
-          }, 2000);
+            window.location.reload();
+          }, 500);
         } else {
-          // Fallback: provide feedback that manual action is needed
-          button.innerHTML = `
-            <svg aria-hidden="true" height="16" viewBox="0 0 16 16" width="16" class="octicon" style="color: #db6d28;">
-              <path fill="currentColor" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path>
-            </svg>
-          `;
-          button.style.color = '#db6d28';
-          button.title = 'Could not find review request button. Please use the Reviewers section manually.';
-          setTimeout(() => {
-            button.innerHTML = playIcon;
-            button.style.color = '';
-            button.title = 'Request Copilot review for draft PR';
-          }, 3000);
+          throw new Error(`Request failed: ${response.status}`);
         }
-      } else {
-        // Could not find reviewers section
+      } catch (err) {
+        console.error('Failed to request review:', err);
         button.innerHTML = `
-          <svg aria-hidden="true" height="16" viewBox="0 0 16 16" width="16" class="octicon" style="color: #db6d28;">
-            <path fill="currentColor" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path>
+          <svg aria-hidden="true" height="16" viewBox="0 0 16 16" width="16" class="octicon" style="color: #f85149;">
+            <path fill="currentColor" d="M3.72 3.72a.75.75 0 0 1 1.06 0L8 6.94l3.22-3.22a.749.749 0 0 1 1.275.326.749.749 0 0 1-.215.734L9.06 8l3.22 3.22a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215L8 9.06l-3.22 3.22a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042L6.94 8 3.72 4.78a.75.75 0 0 1 0-1.06Z"></path>
           </svg>
         `;
-        button.style.color = '#db6d28';
-        button.title = 'Could not find Reviewers section. Please request review manually.';
+        button.style.color = '#f85149';
+        button.title = 'Failed to request review';
         setTimeout(() => {
           button.innerHTML = playIcon;
           button.style.color = '';
