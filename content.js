@@ -89,25 +89,23 @@
       return true;
     }
 
-    // Create the button
+    // Create the button - icon only with play icon
     const button = document.createElement('button');
     button.id = 'copilot-request-review-btn';
-    button.className = 'btn btn-sm';
-    button.style.marginLeft = '8px';
-    button.innerHTML = `
-      <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" style="display:inline-block;vertical-align:text-bottom;">
-        <path fill="currentColor" d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0ZM1.5 8a6.5 6.5 0 1 0 13 0 6.5 6.5 0 0 0-13 0Zm7.25-3.25v2.992l2.028.812a.75.75 0 0 1-.557 1.392l-2.5-1A.751.751 0 0 1 7.25 8V4.75a.75.75 0 0 1 1.5 0Z"></path>
-      </svg>
-      Request Review
-    `;
+    button.className = 'Button Button--iconOnly Button--secondary Button--small';
+    button.type = 'button';
+    button.style.cssText = 'margin-left: 4px; position: relative; top: -4px;';
     button.title = 'Request Copilot review for draft PR';
+    const playIcon = `
+      <svg aria-hidden="true" height="16" viewBox="0 0 16 16" width="16" class="octicon">
+        <path fill="currentColor" d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0ZM1.5 8a6.5 6.5 0 1 0 13 0 6.5 6.5 0 0 0-13 0Zm4.879-2.773 4.264 2.559a.25.25 0 0 1 0 .428l-4.264 2.559A.25.25 0 0 1 6 10.559V5.442a.25.25 0 0 1 .379-.215Z"></path>
+      </svg>
+    `;
+    button.innerHTML = playIcon;
     
     // Add click handler
     button.addEventListener('click', async function(e) {
       e.preventDefault();
-      
-      // Save original button content
-      const originalText = button.innerHTML;
       
       // Try to find the review request form/button
       // GitHub's UI typically has a button or action to request reviews
@@ -137,29 +135,27 @@
           
           // Visual feedback - success
           button.innerHTML = `
-            <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" style="display:inline-block;vertical-align:text-bottom;">
+            <svg aria-hidden="true" height="16" viewBox="0 0 16 16" width="16" class="octicon" style="color: #1a7f37;">
               <path fill="currentColor" d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"></path>
             </svg>
-            Requested!
           `;
           button.style.color = '#1a7f37';
           
           setTimeout(() => {
-            button.innerHTML = originalText;
+            button.innerHTML = playIcon;
             button.style.color = '';
           }, 2000);
         } else {
           // Fallback: provide feedback that manual action is needed
           button.innerHTML = `
-            <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" style="display:inline-block;vertical-align:text-bottom;">
+            <svg aria-hidden="true" height="16" viewBox="0 0 16 16" width="16" class="octicon" style="color: #db6d28;">
               <path fill="currentColor" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path>
             </svg>
-            Use Reviewers section
           `;
           button.style.color = '#db6d28';
           button.title = 'Could not find review request button. Please use the Reviewers section manually.';
           setTimeout(() => {
-            button.innerHTML = originalText;
+            button.innerHTML = playIcon;
             button.style.color = '';
             button.title = 'Request Copilot review for draft PR';
           }, 3000);
@@ -167,15 +163,14 @@
       } else {
         // Could not find reviewers section
         button.innerHTML = `
-          <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" style="display:inline-block;vertical-align:text-bottom;">
+          <svg aria-hidden="true" height="16" viewBox="0 0 16 16" width="16" class="octicon" style="color: #db6d28;">
             <path fill="currentColor" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path>
           </svg>
-          Use Reviewers section
         `;
         button.style.color = '#db6d28';
         button.title = 'Could not find Reviewers section. Please request review manually.';
         setTimeout(() => {
-          button.innerHTML = originalText;
+          button.innerHTML = playIcon;
           button.style.color = '';
           button.title = 'Request Copilot review for draft PR';
         }, 3000);
