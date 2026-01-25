@@ -4,87 +4,68 @@
 (function() {
   'use strict';
 
-  // Feature 1: Add "Copy PR Link" button next to PR title
+  // Feature 1: Add "Copy PR Link" button next to the copy branch button
   function addCopyPRLinkButton() {
-    // Find the PR title element
-    const titleElement = document.querySelector('.js-issue-title');
-    if (!titleElement) {
-      return false;
-    }
-
     // Check if button already exists
     if (document.getElementById('copy-pr-link-btn')) {
       return true;
     }
 
-    // Create the button
+    // Find the copy branch button (clipboard icon next to branch name)
+    const copyBranchBtn = document.querySelector('.gh-header-meta clipboard-copy');
+    if (!copyBranchBtn) {
+      return false;
+    }
+
+    // Get PR title for copying
+    const titleElement = document.querySelector('.js-issue-title');
+    if (!titleElement) {
+      return false;
+    }
+
+    // Create the button - match the style of the existing clipboard-copy button
     const button = document.createElement('button');
     button.id = 'copy-pr-link-btn';
-    button.className = 'btn btn-sm';
-    button.style.cssText = 'margin-left: 8px; vertical-align: middle; display: inline-flex; align-items: center; gap: 4px;';
+    button.className = 'Button Button--iconOnly Button--secondary Button--small';
+    button.type = 'button';
+    button.title = 'Copy PR link';
     button.innerHTML = `
-      <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16">
-        <path fill="currentColor" d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Zm5.22-1.72a.75.75 0 0 1 1.06 0l3.97 3.97V4.25a.75.75 0 0 1 1.5 0v6.5a.75.75 0 0 1-.75.75h-6.5a.75.75 0 0 1 0-1.5H9.44L5.47 5.53a.75.75 0 0 1 0-1.06Z"></path>
+      <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" class="octicon octicon-link">
+        <path fill="currentColor" d="m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z"></path>
       </svg>
-      <span>Copy PR Link</span>
     `;
-    button.title = 'Copy PR title and link to clipboard';
     
     // Add click handler
     button.addEventListener('click', async function(e) {
       e.preventDefault();
       
-      // Get PR title and URL
       const prTitle = titleElement.textContent.trim();
       const prUrl = window.location.href;
       const textToCopy = `${prTitle}: ${prUrl}`;
       
-      // Copy to clipboard
-      // Save original button content before try/catch
-      const originalText = button.innerHTML;
       try {
         await navigator.clipboard.writeText(textToCopy);
-        
-        // Visual feedback
+        // Visual feedback - change to checkmark
         button.innerHTML = `
-          <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" style="display:inline-block;vertical-align:text-bottom;">
+          <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" class="octicon octicon-check" style="color: #1a7f37;">
             <path fill="currentColor" d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"></path>
           </svg>
-          Copied!
         `;
-        button.style.color = '#1a7f37';
-        
         setTimeout(() => {
-          button.innerHTML = originalText;
-          button.style.color = '';
+          button.innerHTML = `
+            <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" class="octicon octicon-link">
+              <path fill="currentColor" d="m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z"></path>
+            </svg>
+          `;
         }, 2000);
       } catch (err) {
         console.error('Failed to copy:', err);
-        button.innerHTML = `
-          <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" style="display:inline-block;vertical-align:text-bottom;">
-            <path fill="currentColor" d="M9.036 7.976a.75.75 0 0 0-1.06 1.06L10.939 12l-2.963 2.963a.75.75 0 1 0 1.06 1.06L12 13.06l2.963 2.964a.75.75 0 0 0 1.061-1.06L13.061 12l2.963-2.964a.75.75 0 0 0-1.06-1.06L12 10.939 9.036 7.976Z"></path>
-            <path fill="currentColor" d="M12 1c6.075 0 11 4.925 11 11s-4.925 11-11 11S1 18.075 1 12 5.925 1 12 1ZM2.5 12a9.5 9.5 0 0 0 9.5 9.5 9.5 9.5 0 0 0 9.5-9.5A9.5 9.5 0 0 0 12 2.5 9.5 9.5 0 0 0 2.5 12Z"></path>
-          </svg>
-          Failed
-        `;
-        button.style.color = '#f85149';
-        setTimeout(() => {
-          button.innerHTML = originalText;
-          button.style.color = '';
-        }, 2000);
       }
     });
     
-    // Insert button after the PR number
-    const prNumberElement = document.querySelector('.gh-header-number');
-    if (prNumberElement) {
-      prNumberElement.after(button);
-      return true;
-    }
-    
-    return false;
-    
-    return false;
+    // Insert button after the copy branch button
+    copyBranchBtn.after(button);
+    return true;
   }
 
   // Feature 2: Add "Request Review" button next to Copilot reviewer for draft PRs
