@@ -21,13 +21,12 @@
     const button = document.createElement('button');
     button.id = 'copy-pr-link-btn';
     button.className = 'btn btn-sm';
-    button.style.marginLeft = '8px';
-    button.style.verticalAlign = 'middle';
+    button.style.cssText = 'margin-left: 8px; vertical-align: middle; display: inline-flex; align-items: center; gap: 4px;';
     button.innerHTML = `
-      <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" style="display:inline-block;vertical-align:middle;margin-right:4px;">
+      <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16">
         <path fill="currentColor" d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Zm5.22-1.72a.75.75 0 0 1 1.06 0l3.97 3.97V4.25a.75.75 0 0 1 1.5 0v6.5a.75.75 0 0 1-.75.75h-6.5a.75.75 0 0 1 0-1.5H9.44L5.47 5.53a.75.75 0 0 1 0-1.06Z"></path>
       </svg>
-      Copy PR Link
+      <span>Copy PR Link</span>
     `;
     button.title = 'Copy PR title and link to clipboard';
     
@@ -77,19 +76,13 @@
     });
     
     // Insert button after the PR number
-    const titleContainer = titleElement.parentElement;
-    if (titleContainer) {
-      titleContainer.style.display = 'flex';
-      titleContainer.style.alignItems = 'center';
-      // Find the PR number element (span with issue number after title)
-      const prNumberElement = titleContainer.querySelector('.gh-header-number');
-      if (prNumberElement) {
-        prNumberElement.after(button);
-      } else {
-        titleElement.after(button);
-      }
+    const prNumberElement = document.querySelector('.gh-header-number');
+    if (prNumberElement) {
+      prNumberElement.after(button);
       return true;
     }
+    
+    return false;
     
     return false;
   }
