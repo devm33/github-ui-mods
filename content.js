@@ -78,8 +78,13 @@
       return false;
     }
 
-    // Find the Copilot reviewer link
-    const copilotLink = document.querySelector('a[href="/apps/copilot-pull-request-reviewer"]');
+    // Find the Copilot reviewer link in the sidebar only (not in timeline)
+    const sidebar = document.querySelector('.Layout-sidebar');
+    if (!sidebar) {
+      return false;
+    }
+    
+    const copilotLink = sidebar.querySelector('a[href="/apps/copilot-pull-request-reviewer"]');
     if (!copilotLink) {
       return false;
     }
