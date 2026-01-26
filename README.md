@@ -2,6 +2,8 @@
 
 A Chrome extension that adds useful modifications to the GitHub pull request interface.
 
+https://chromewebstore.google.com/detail/github-ui-mods/fnmaeopgcjnpkimkknpeoimkdjaahfla
+
 ![Screenshot](screenshot.png)
 
 ## Features
