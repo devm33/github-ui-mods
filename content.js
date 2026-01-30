@@ -11,28 +11,45 @@
       return true;
     }
 
-    // Find the copy branch button (clipboard icon next to branch name)
-    const copyBranchBtn = document.querySelector('.gh-header-meta clipboard-copy');
+    // Find the copy branch button (IconButton with octicon-copy next to branch name)
+    // Look for the button that has a tooltip about copying the head branch name
+    // The button is inside .prc-PageHeader-Description-w-ejP (non-sticky header)
+    const headerDescription = document.querySelector('.prc-PageHeader-Description-w-ejP');
+    let copyBranchBtn = null;
+    if (headerDescription) {
+      copyBranchBtn = headerDescription.querySelector('button.prc-Button-IconButton-fyge7 .octicon-copy')?.closest('button');
+    }
+    // Fallback to legacy selector
+    if (!copyBranchBtn) {
+      copyBranchBtn = document.querySelector('.gh-header-meta clipboard-copy');
+    }
     if (!copyBranchBtn) {
       return false;
     }
 
-    // Get PR title for copying
-    const titleElement = document.querySelector('.js-issue-title');
+    // Get PR title for copying - try new React header first, then legacy
+    const titleElement = document.querySelector('.prc-PageHeader-Title-p0Mgh .markdown-title') ||
+                         document.querySelector('h1 .markdown-title') ||
+                         document.querySelector('.js-issue-title');
     if (!titleElement) {
       return false;
     }
 
-    // Create the button - match the style of the existing clipboard-copy button
+    // Create the button - match the style of the existing IconButton
     const button = document.createElement('button');
     button.id = 'copy-pr-link-btn';
-    button.className = 'Button Button--iconOnly Button--secondary Button--small';
     button.type = 'button';
+    // Use the same class as the copy branch button for consistent styling
+    button.className = 'prc-Button-ButtonBase-9n-Xk prc-Button-IconButton-fyge7';
+    button.setAttribute('data-loading', 'false');
+    button.setAttribute('data-no-visuals', 'true');
+    button.setAttribute('data-size', 'small');
+    button.setAttribute('data-variant', 'invisible');
     button.title = 'Copy PR link';
-    button.style.cssText = 'vertical-align: middle; margin-left: 4px;';
+    button.style.cssText = 'margin-left: 4px;';
     button.innerHTML = `
-      <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" class="octicon octicon-link">
-        <path fill="currentColor" d="m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z"></path>
+      <svg aria-hidden="true" focusable="false" height="16" viewBox="0 0 16 16" width="16" fill="currentColor" class="octicon octicon-link" style="vertical-align: text-bottom;">
+        <path d="m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z"></path>
       </svg>
     `;
     
@@ -48,14 +65,14 @@
         await navigator.clipboard.writeText(textToCopy);
         // Visual feedback - change to checkmark
         button.innerHTML = `
-          <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" class="octicon octicon-check" style="color: #1a7f37;">
-            <path fill="currentColor" d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"></path>
+          <svg aria-hidden="true" focusable="false" height="16" viewBox="0 0 16 16" width="16" fill="#1a7f37" class="octicon octicon-check" style="vertical-align: text-bottom;">
+            <path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"></path>
           </svg>
         `;
         setTimeout(() => {
           button.innerHTML = `
-            <svg aria-hidden="true" height="16" viewBox="0 0 16 16" version="1.1" width="16" class="octicon octicon-link">
-              <path fill="currentColor" d="m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z"></path>
+            <svg aria-hidden="true" focusable="false" height="16" viewBox="0 0 16 16" width="16" fill="currentColor" class="octicon octicon-link" style="vertical-align: text-bottom;">
+              <path d="m7.775 3.275 1.25-1.25a3.5 3.5 0 1 1 4.95 4.95l-2.5 2.5a3.5 3.5 0 0 1-4.95 0 .751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018 1.998 1.998 0 0 0 2.83 0l2.5-2.5a2.002 2.002 0 0 0-2.83-2.83l-1.25 1.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042Zm-4.69 9.64a1.998 1.998 0 0 0 2.83 0l1.25-1.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042l-1.25 1.25a3.5 3.5 0 1 1-4.95-4.95l2.5-2.5a3.5 3.5 0 0 1 4.95 0 .751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018 1.998 1.998 0 0 0-2.83 0l-2.5 2.5a1.998 1.998 0 0 0 0 2.83Z"></path>
             </svg>
           `;
         }, 2000);
@@ -71,20 +88,23 @@
 
   // Feature 2: Add "Request Review" button next to Copilot reviewer for draft PRs
   function addCopilotReviewButton() {
-    // Check if this is a draft PR
-    const draftBadge = document.querySelector('.State[title="Status: Draft"]');
+    // Check if this is a draft PR - try new React state label first, then legacy
+    const draftBadge = document.querySelector('[data-status="pullDraft"]') ||
+                       document.querySelector('.State[title="Status: Draft"]');
     if (!draftBadge) {
       // Not a draft PR, no need to add the button
       return false;
     }
 
-    // Find the Copilot reviewer link in the sidebar only (not in timeline)
-    const sidebar = document.querySelector('.Layout-sidebar');
-    if (!sidebar) {
+    // Find the Copilot reviewer link in the sidebar/reviewers section only (not in timeline)
+    // Look for the reviewers container first
+    const reviewersSection = document.querySelector('form[action*="review-requests"]')?.closest('.discussion-sidebar-item') ||
+                             document.querySelector('.sidebar-assignee');
+    if (!reviewersSection) {
       return false;
     }
     
-    const copilotLink = sidebar.querySelector('a[href="/apps/copilot-pull-request-reviewer"]');
+    const copilotLink = reviewersSection.querySelector('a[href="/apps/copilot-pull-request-reviewer"]');
     if (!copilotLink) {
       return false;
     }
@@ -218,8 +238,10 @@
       addCopilotReviewButton();
     });
     
-    // Observe the main container for changes
-    const container = document.querySelector('#partial-discussion-header') || document.body;
+    // Observe the main container for changes - try React app container first
+    const container = document.querySelector('react-app[app-name="pull-requests"]') ||
+                      document.querySelector('#partial-discussion-header') ||
+                      document.body;
     observer.observe(container, {
       childList: true,
       subtree: true
